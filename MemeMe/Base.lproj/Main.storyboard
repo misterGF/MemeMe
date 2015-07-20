@@ -131,18 +131,6 @@
                                                 <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ODg-PO-uL4">
                                                     <rect key="frame" x="22" y="39" width="92" height="60"/>
                                                 </imageView>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7Gg-K4-C8h">
-                                                    <rect key="frame" x="47" y="16" width="42" height="21"/>
-                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
-                                                    <nil key="highlightedColor"/>
-                                                </label>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fk9-d9-KaO">
-                                                    <rect key="frame" x="47" y="103" width="42" height="21"/>
-                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
-                                                    <nil key="highlightedColor"/>
-                                                </label>
                                             </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </view>
@@ -208,7 +196,11 @@
                                     <constraint firstAttribute="height" constant="50" id="gc5-4G-udx"/>
                                 </constraints>
                                 <items>
-                                    <barButtonItem width="50" systemItem="action" id="VbH-VM-cq1"/>
+                                    <barButtonItem enabled="NO" systemItem="action" id="VbH-VM-cq1">
+                                        <connections>
+                                            <action selector="shareButton:" destination="ZWo-IJ-c34" id="BKi-yH-Qf8"/>
+                                        </connections>
+                                    </barButtonItem>
                                     <barButtonItem width="208" style="plain" systemItem="fixedSpace" id="Blp-sZ-tGR"/>
                                     <barButtonItem title="Cancel" width="50" id="GDB-d2-KmV">
                                         <connections>
@@ -217,13 +209,13 @@
                                     </barButtonItem>
                                 </items>
                             </toolbar>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="TOP" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ajC-ku-fCO">
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="TOP" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ajC-ku-fCO">
                                 <rect key="frame" x="36" y="106" width="237" height="55"/>
                                 <nil key="textColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="mWb-Zp-Etj">
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleAspectFit" misplaced="YES" restorationIdentifier="bottonText" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="BOTTOM" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="mWb-Zp-Etj">
                                 <rect key="frame" x="36" y="443" width="237" height="55"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
@@ -245,9 +237,12 @@
                     </view>
                     <connections>
                         <outlet property="albumButton" destination="x3R-9G-7y3" id="6SM-ly-Hbb"/>
+                        <outlet property="bottomShelf" destination="fSV-4p-est" id="cag-ym-wgT"/>
                         <outlet property="bottomText" destination="mWb-Zp-Etj" id="wvj-fH-Yai"/>
                         <outlet property="cameraButton" destination="cHZ-Sp-nWq" id="PiJ-yI-SEY"/>
                         <outlet property="imageView" destination="PVn-tk-RE4" id="CJv-JT-Mon"/>
+                        <outlet property="shareBtn" destination="VbH-VM-cq1" id="4cc-Z6-ila"/>
+                        <outlet property="topShelf" destination="veQ-1G-4ZZ" id="l5m-ON-P6a"/>
                         <outlet property="topText" destination="ajC-ku-fCO" id="7Ad-MR-BWQ"/>
                     </connections>
                 </viewController>
@@ -285,6 +280,6 @@
         <simulatedScreenMetrics key="destination" type="retina4"/>
     </simulatedMetricsContainer>
     <inferredMetricsTieBreakers>
-        <segue reference="cmp-FO-YZr"/>
+        <segue reference="A04-fF-MMr"/>
     </inferredMetricsTieBreakers>
 </document>

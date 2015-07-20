@@ -18,7 +18,12 @@ UINavigationControllerDelegate, UITextFieldDelegate {
     @IBOutlet weak var albumButton: UIBarButtonItem!
     @IBOutlet weak var topText: UITextField!
     @IBOutlet weak var bottomText: UITextField!
+    @IBOutlet weak var shareBtn: UIBarButtonItem!
+    @IBOutlet weak var topShelf: UIToolbar!
+    @IBOutlet weak var bottomShelf: UIToolbar!
+
     var keyboardHeight: CGFloat!
+    var liftScreen = false //Controll for when top text is selected
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,12 +40,14 @@ UINavigationControllerDelegate, UITextFieldDelegate {
         
         //Pre-fill top text
         topText.placeholder = "Top"
+        topText.tag = 1
         topText.textAlignment = .Center
         topText.defaultTextAttributes = memeTextAttributes
         topText.delegate = self
         
         //Pre-fill bottom text
         bottomText.placeholder = "Bottom"
+        bottomText.tag = 2
         bottomText.textAlignment = .Center
         bottomText.defaultTextAttributes = memeTextAttributes
         bottomText.delegate = self
@@ -61,9 +68,24 @@ UINavigationControllerDelegate, UITextFieldDelegate {
         self.unsubscribeFromKeyboardNotifications()
     }
     
+    func textFieldShouldBeginEditing(textField: UITextField) -> Bool {
+       
+        //Check which text was selected and keep it handy
+       if(textField.tag == 1)
+       {
+            liftScreen = false
+        }
+        else
+       {
+            liftScreen = true
+        }
+
+        return true
+    }
+    
     func subscribeToKeyboardNotifications() {
         
-        //Keyboard is going to appear. Change the hight.
+        //Keyboard is going to appear. Change the height.
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWillShow:", name: UIKeyboardWillShowNotification, object: nil)
         
         //Keyboard closing. Bring y axis back
@@ -73,19 +95,30 @@ UINavigationControllerDelegate, UITextFieldDelegate {
     func unsubscribeFromKeyboardNotifications() {
         
         NSNotificationCenter.defaultCenter().removeObserver(self, name: UIKeyboardWillShowNotification, object: nil)
+        NSNotificationCenter.defaultCenter().removeObserver(self, name: UIKeyboardWillHideNotification, object: nil)
     }
     
     func keyboardWillShow(notification: NSNotification) {
         
-        //Bring up y axis by keyboard height
-        keyboardHeight = getKeyboardHeight(notification)
-        self.view.frame.origin.y -= keyboardHeight
+        if(liftScreen)
+        {
+            //Bring up y axis by keyboard height
+            keyboardHeight = getKeyboardHeight(notification)
+            self.view.frame.origin.y -= keyboardHeight
+            
+        }
+
     }
     
     func keyboardWillHide(notification: NSNotification) {
+
+        if(liftScreen)
+        {
+            //Reset keyboard value
+            keyboardHeight = getKeyboardHeight(notification)
+            self.view.frame.origin.y += keyboardHeight
+        }
         
-        //Reset keyboard value
-        self.view.frame.origin.y += keyboardHeight
     }
     
     func getKeyboardHeight(notification: NSNotification) -> CGFloat {
@@ -100,7 +133,7 @@ UINavigationControllerDelegate, UITextFieldDelegate {
         
         //Album clicked
         imagePickerRegister("Photo")
-        println("Photo button clicked.")
+        
     }
     
     @IBAction func pickAnImageFromCamera(sender: AnyObject) {
@@ -125,6 +158,8 @@ UINavigationControllerDelegate, UITextFieldDelegate {
         imagePicker.sourceType = (type == "Photo") ? UIImagePickerControllerSourceType.PhotoLibrary : UIImagePickerControllerSourceType.Camera
         self.presentViewController(imagePicker, animated: true, completion: nil)
         
+        shareBtn.enabled = true //Enable share button after image picked.
+        
     }
     
     func imagePickerController(picker: UIImagePickerController,
@@ -143,40 +178,67 @@ UINavigationControllerDelegate, UITextFieldDelegate {
         self.dismissViewControllerAnimated(true, completion: nil)
         
     }
-    
+ /*
     func imagePickerControllerDidCancel(picker: UIImagePickerController){
         
         //Handle canceled image picker
         self.dismissViewControllerAnimated(true, completion: nil)
     }
-    
-    func save() {
-        
-        //Create the meme
+ */
+    @IBAction func shareButton(sender: UIBarButtonItem) {
+      
+        //Call UIActivityViewController
         var memedImage = generateMemedImage()
+        let activityViewController = UIActivityViewController(activityItems: [memedImage], applicationActivities: nil)
+
+       //Handler for completion
+        activityViewController.completionWithItemsHandler = { activity, success, items, error in
+            
+            //Generate a memed image
+            self.save(memedImage);
+            
+            //Dismiss
+            self.dismissViewControllerAnimated(true, completion: nil)
+            
+        }
+
+        self.presentViewController(activityViewController,
+            animated: true,
+            completion: nil)
+        
+    }
+    
+    func save(memedImage : UIImage) {
         
         var meme = Meme(top: topText.text, bottom: bottomText.text, image:
             imageView.image, memedImage: memedImage)
         
+        //Add meme to array in app delegate
+        (UIApplication.sharedApplication().delegate as! AppDelegate).memes.append(meme)
+        
+        let myMemes = (UIApplication.sharedApplication().delegate as! AppDelegate).memes
+        println("Printed memes")
     }
     
     func generateMemedImage() -> UIImage {
         
-        // Hide toolbar and navbar
+        // Hide toolbar
+        self.topShelf.hidden = true
+        self.bottomShelf.hidden = true
+        
         self.navigationController?.navigationBar.hidden = true
         self.navigationController?.toolbar.hidden = true
         
         // Render view to an image
-        UIGraphicsBeginImageContext(self.view.frame.size)
-        self.view.drawViewHierarchyInRect(self.view.frame,
-            afterScreenUpdates: true)
-        let memedImage : UIImage =
-        UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsBeginImageContext(view.frame.size)
+        //self.view.drawViewHierarchyInRect(self.view.frame, afterScreenUpdates: false)
+        view.layer.renderInContext(UIGraphicsGetCurrentContext())
+        let memedImage : UIImage = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         
-        // Show toolbar and navbar
-        self.navigationController?.navigationBar.hidden = false
-        self.navigationController?.toolbar.hidden = false
+        // Show toolbar
+        self.topShelf.hidden = false
+        self.bottomShelf.hidden = false
         
         return memedImage
     }
