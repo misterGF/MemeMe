@@ -10,15 +10,18 @@ import Foundation
 import UIKit
 
 class Meme {
-    var top : String!
-    var bottom : String!
-    var image: UIImage?
-    var memedImage: UIImage?
+
+    var topText : String!
+    var bottomText : String!
     
-    init(top : String?, bottom : String?, image: UIImage?, memedImage: UIImage?){
-        self.top = top
-        self.bottom = bottom
+    var image: UIImage!
+    var memedImage: UIImage!
+    
+    init(topText : String!, bottomText : String!, image: UIImage!, memedImage: UIImage!){
+        self.topText = topText
+        self.bottomText = bottomText
         self.image = image
         self.memedImage = memedImage
     }
+    
 }

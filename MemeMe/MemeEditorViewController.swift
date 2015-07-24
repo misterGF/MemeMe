@@ -14,51 +14,51 @@ UINavigationControllerDelegate, UITextFieldDelegate {
  
     //Define my variables
     @IBOutlet weak var imageView: UIImageView!
+    
     @IBOutlet weak var cameraButton: UIBarButtonItem!
     @IBOutlet weak var albumButton: UIBarButtonItem!
+    
     @IBOutlet weak var topText: UITextField!
     @IBOutlet weak var bottomText: UITextField!
+    let topTextFieldDelegate = TopTextFieldDelegate()
+    let bottomTextFieldDelegate = BottomTextFieldDelegate()
+    
     @IBOutlet weak var shareBtn: UIBarButtonItem!
+    
     @IBOutlet weak var topShelf: UIToolbar!
     @IBOutlet weak var bottomShelf: UIToolbar!
 
-    var keyboardHeight: CGFloat!
-    var liftScreen = false //Controll for when top text is selected
+    //Define my text for my memes
+    let memeTextAttributes = [
+        NSStrokeColorAttributeName : UIColor.blackColor(),
+        NSForegroundColorAttributeName : UIColor.whiteColor(),
+        NSFontAttributeName : UIFont(name: "HelveticaNeue-Bold", size: 48)!,
+        NSStrokeWidthAttributeName : -3.0        ]
+    
+
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        // Disable camera when not enabled
+        cameraButton.enabled = UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera)
+        
+        //Style text
+        self.topText.tag = 1
+        self.bottomText.tag = 2
+        styleTextField(self.topText)
+        styleTextField(self.bottomText)
+
+        //Subscribe to keyboard notification events
+        self.subscribeToKeyboardNotifications()
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Disable camera when not enabled
-        cameraButton.enabled = UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera)
+        //Register delegates
+        self.topText.delegate = topTextFieldDelegate
+        self.bottomText.delegate = bottomTextFieldDelegate
         
-        //Define my text for my memes
-        let memeTextAttributes = [
-            NSStrokeColorAttributeName : UIColor.blackColor(),
-            NSForegroundColorAttributeName : UIColor.whiteColor(),
-            NSFontAttributeName : UIFont(name: "HelveticaNeue", size: 48)!,
-            NSStrokeWidthAttributeName : -3.0        ]
-        
-        //Pre-fill top text
-        topText.placeholder = "Top"
-        topText.tag = 1
-        topText.textAlignment = .Center
-        topText.defaultTextAttributes = memeTextAttributes
-        topText.delegate = self
-        
-        //Pre-fill bottom text
-        bottomText.placeholder = "Bottom"
-        bottomText.tag = 2
-        bottomText.textAlignment = .Center
-        bottomText.defaultTextAttributes = memeTextAttributes
-        bottomText.delegate = self
-    }
-    
-    
-    override func viewWillAppear(animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        //Subscribe to keyboard notification events
-        self.subscribeToKeyboardNotifications()
     }
     
     override func viewWillDisappear(animated: Bool) {
@@ -68,19 +68,14 @@ UINavigationControllerDelegate, UITextFieldDelegate {
         self.unsubscribeFromKeyboardNotifications()
     }
     
-    func textFieldShouldBeginEditing(textField: UITextField) -> Bool {
-       
-        //Check which text was selected and keep it handy
-       if(textField.tag == 1)
-       {
-            liftScreen = false
-        }
-        else
-       {
-            liftScreen = true
-        }
-
-        return true
+    func styleTextField(textField: UITextField){
+        
+        //Style our text fields
+        textField.defaultTextAttributes = self.memeTextAttributes
+        textField.backgroundColor = UIColor.clearColor()
+        textField.borderStyle = .None
+        textField.textAlignment = NSTextAlignment.Center
+        
     }
     
     func subscribeToKeyboardNotifications() {
@@ -100,23 +95,19 @@ UINavigationControllerDelegate, UITextFieldDelegate {
     
     func keyboardWillShow(notification: NSNotification) {
         
-        if(liftScreen)
-        {
+        if bottomText.isFirstResponder() {
             //Bring up y axis by keyboard height
-            keyboardHeight = getKeyboardHeight(notification)
-            self.view.frame.origin.y -= keyboardHeight
-            
+            self.view.frame.origin.y -= getKeyboardHeight(notification)
         }
 
     }
     
     func keyboardWillHide(notification: NSNotification) {
 
-        if(liftScreen)
+        if bottomText.isFirstResponder()
         {
             //Reset keyboard value
-            keyboardHeight = getKeyboardHeight(notification)
-            self.view.frame.origin.y += keyboardHeight
+            self.view.frame.origin.y += getKeyboardHeight(notification)
         }
         
     }
@@ -131,6 +122,9 @@ UINavigationControllerDelegate, UITextFieldDelegate {
     
     @IBAction func pickAnImageFromAlbum(sender: AnyObject) {
         
+        var memes: [Meme]!
+        let applicationDelegate = (UIApplication.sharedApplication().delegate as! AppDelegate)
+        memes = applicationDelegate.memes
         //Album clicked
         imagePickerRegister("Photo")
         
@@ -140,14 +134,6 @@ UINavigationControllerDelegate, UITextFieldDelegate {
         
         //Camera picked
         imagePickerRegister("Camera")
-    }
-    
-    
-    func textFieldShouldReturn(textField: UITextField) -> Bool {
-        
-        //Close keyboard on enter
-        textField.resignFirstResponder()
-        return true
     }
     
     func imagePickerRegister(type : String){
@@ -178,13 +164,7 @@ UINavigationControllerDelegate, UITextFieldDelegate {
         self.dismissViewControllerAnimated(true, completion: nil)
         
     }
- /*
-    func imagePickerControllerDidCancel(picker: UIImagePickerController){
-        
-        //Handle canceled image picker
-        self.dismissViewControllerAnimated(true, completion: nil)
-    }
- */
+
     @IBAction func shareButton(sender: UIBarButtonItem) {
       
         //Call UIActivityViewController
@@ -210,14 +190,13 @@ UINavigationControllerDelegate, UITextFieldDelegate {
     
     func save(memedImage : UIImage) {
         
-        var meme = Meme(top: topText.text, bottom: bottomText.text, image:
+        var meme = Meme(topText: self.topText.text, bottomText : self.bottomText.text, image:
             imageView.image, memedImage: memedImage)
         
         //Add meme to array in app delegate
         (UIApplication.sharedApplication().delegate as! AppDelegate).memes.append(meme)
-        
         let myMemes = (UIApplication.sharedApplication().delegate as! AppDelegate).memes
-        println("Printed memes")
+
     }
     
     func generateMemedImage() -> UIImage {

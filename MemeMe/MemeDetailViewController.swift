@@ -12,8 +12,8 @@ import UIKit
 class MemeDetailViewController: UIViewController {
     
     @IBOutlet weak var imageView: UIImageView!
-
     var meme: Meme!
+    var memeNumber: Int!
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
